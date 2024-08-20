@@ -3,8 +3,8 @@ import "./App.css";
 
 function App() {
   const [table, setTable] = useState([
-    { name: "shravan", age: "21", role: "SDE", score: 10 },
-    { name: "guru", age: "22", role: "Full stack developer", score: 8 },
+    { id:1 ,name: "shravan", age: "21", role: "SDE", score: 10 },
+    { id:2 ,name: "guru", age: "22", role: "Full stack developer", score: 8 },
   ]);
   const [editable, setEditable] = useState(false);
   const [editableRow, setEditableRow] = useState("");
