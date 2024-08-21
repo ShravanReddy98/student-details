@@ -7,18 +7,16 @@ function App() {
     { id:2 ,name: "guru", age: "22", role: "Full stack developer", score: 8 },
   ]);
   const [editable, setEditable] = useState(false);
-  const [editableRow, setEditableRow] = useState("");
-  const [Row, setRow] = useState("");
+  const [editableRow, setEditableRow] = useState(null);
+  const [Row, setRow] = useState({});
   const [openFilters, setOpenFilters] = useState(false);
-  const [filters, setFilters] = useState([]);
-  const [applyFilters, setApplyFilters] = useState(false);
-  const [filteredTable, setFilteredTable] = useState([]);
+  const [filters, setFilters] = useState({ name: "", min: "", max: "" });
   const [addDisabled, setAddDisabled] = useState(false);
 
   const handleAddClick = () => {
     setTable([
       ...table,
-      { id: table.length, name: "name", age: "age", role: "role", score: 0 },
+      { id: Date.now(), name: "", age: "", role: "", score: null },
     ]);
   };
 
@@ -26,7 +24,6 @@ function App() {
     setRow({ ...Row, [field]: value });
   };
   const handleSaveClick = () => {
-    console.log(Row);
     setTable([
       ...table.map((row) => (row.id === Row.id ? { ...Row } : { ...row })),
     ]);
@@ -34,6 +31,14 @@ function App() {
     setEditable(false);
     setEditableRow("");
   };
+
+  let filteredtable = table.filter((row) => {
+    return (
+      row.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+      (filters.min === "" || parseFloat(row.score) >= parseFloat(filters.min)) &&
+      (filters.max === "" || parseFloat(row.score) <= parseFloat(filters.max))
+    );
+  });
 
   return (
     <div className="App">
@@ -43,23 +48,11 @@ function App() {
           <button onClick={() => setOpenFilters(!openFilters)}>Filters</button>
           {openFilters && (
             <div className="filters">
-              <div>Filters</div>
+              <h3>Filters</h3>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  setFilteredTable(
-                    table.filter((row) => {
-                      return (
-                        (filters.name ? row.name === filters.name : true) &&
-                        (filters.age ? row.age === filters.age : true) &&
-                        (filters.role ? row.role === filters.role : true) &&
-                        (filters.score ? row.score === filters.score : true)
-                      );
-                    })
-                  );
-                  setApplyFilters(true);
                   setOpenFilters(false);
-                  setAddDisabled(true);
                 }}
               >
                 <div>
@@ -73,47 +66,43 @@ function App() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="age">Age</label>
+                  <label htmlFor="min">Minimum Score</label>
                   <input
                     type="text"
-                    value={filters.age}
+                    value={filters.min}
                     onChange={(e) =>
-                      setFilters({ ...filters, age: e.target.value })
+                      setFilters({ ...filters, min: e.target.value })
                     }
                   />
                 </div>
                 <div>
-                  <label htmlFor="role">Role</label>
+                  <label htmlFor="max">Maximum Score</label>
                   <input
                     type="text"
-                    value={filters.role}
+                    value={filters.max}
                     onChange={(e) =>
-                      setFilters({ ...filters, role: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label htmlFor="score">Score</label>
-                  <input
-                    type="text"
-                    value={filters.score}
-                    onChange={(e) =>
-                      setFilters({ ...filters, score: e.target.value })
+                      setFilters({ ...filters, max: e.target.value })
                     }
                   />
                 </div>
                 <div className="apply_button">
                   <button
-                    type="clear"
+                    // type="clear"
                     onClick={() => {
-                      setFilters([]);
-                      setApplyFilters(false);
+                      setFilters({name: "", max:"",min:""});
                       setAddDisabled(false);
                     }}
                   >
                     Clear Filters
                   </button>
-                  <button type="submit">Apply</button>
+                  <button
+                    onClick={() => {
+                      (filters.name || filters.max || filters.min) &&
+                        setAddDisabled(true);
+                    }}
+                  >
+                    Close
+                  </button>
                 </div>
               </form>
             </div>
@@ -132,8 +121,7 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {applyFilters
-              ? filteredTable.map(
+            {filteredtable.map(
                   (row) =>
                     // <div key={row.id}>
                     editable && editableRow === row.id ? (
@@ -193,94 +181,15 @@ function App() {
                         <td>{row.score}</td>
                         <td>
                           <div className="action">
-                            <button>Save</button>
                             <button
-                              onClick={() => {
-                                console.log(...table);
-                                setEditable(true);
-                                setEditableRow(row.id);
-                                setRow(row);
-                                console.log(row.id);
-                                console.log(editableRow);
-                              }}
-                            >
-                              Edit
+                              onClick={() =>setTable(table.filter((tableRow) => tableRow.id !== row.id))}>
+                              Delete
                             </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  // </div>
-                )
-              : table.map(
-                  (row) =>
-                    // <div key={row.id}>
-                    editable && editableRow === row.id ? (
-                      <tr key={row.id}>
-                        <td className="hi">
-                          <input
-                            type="text"
-                            value={Row.name}
-                            onChange={(e) =>
-                              handleInputChange("name", e.target.value)
-                            }
-                            editable
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={Row.age}
-                            onChange={(e) =>
-                              handleInputChange("age", e.target.value)
-                            }
-                            editable
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={Row.role}
-                            onChange={(e) =>
-                              handleInputChange("role", e.target.value)
-                            }
-                            editable
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            value={Row.score}
-                            onChange={(e) =>
-                              handleInputChange("score", e.target.value)
-                            }
-                            editable
-                          />
-                        </td>
-                        <td>
-                          <div className="action">
-                            <button onClick={handleSaveClick}>Save</button>
-                            <button disabled>Edit</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr key={row.id}>
-                        <td>{row.name}</td>
-                        <td>{row.age}</td>
-                        <td>{row.role}</td>
-                        <td>{row.score}</td>
-                        <td>
-                          <div className="action">
-                            <button>Save</button>
                             <button
                               onClick={() => {
-                                console.log(...table);
                                 setEditable(true);
                                 setEditableRow(row.id);
                                 setRow(row);
-                                console.log(row.id);
-                                console.log(editableRow);
                               }}
                             >
                               Edit
